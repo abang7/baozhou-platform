@@ -33,27 +33,9 @@ public class TeacherGroup {
      *
      * 设计说明：
      * - varchar(50) 对应 String
-     * - 比如：语文组、数学组、英语组等
+     * - 比如：高数组、初数组、小学组等
      */
     private String groupName;
-
-    /**
-     * 学段级别
-     *
-     * 设计说明：
-     * - SQL中是 enum('小学','初中','高中')
-     * - Java中先用 String 存储
-     * - 存储值只能是：'小学'、'初中'、'高中'
-     *
-     * 为什么用String？
-     * - 简单直接，适合新手
-     * - 数据库层面已经做了枚举限制，存不进去其他值
-     *
-     * 进阶做法：
-     * - 可以创建一个Java枚举类 LevelEnum
-     * - 使用MyBatis-Plus的类型处理器自动转换
-     */
-    private String level;
 
     /**
      * 组长ID
