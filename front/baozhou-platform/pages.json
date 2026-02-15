@@ -1,0 +1,72 @@
+  {
+    "pages": [
+      {
+        "path": "pages/index/index",
+        "style": {
+          "navigationBarTitleText": "首页"
+        }
+      },
+      {
+        "path": "pages/student/add",
+        "style": {
+          "navigationBarTitleText": "录入学生",
+          "navigationBarBackgroundColor": "#007AFF",
+          "navigationBarTextStyle": "white"
+        }
+      },
+      {
+        "path": "pages/class/add",
+        "style": {
+          "navigationBarTitleText": "录入课程",
+          "navigationBarBackgroundColor": "#2196F3",
+          "navigationBarTextStyle": "white"
+        }
+      },
+      {
+        "path": "pages/class/schedule",
+        "style": {
+          "navigationBarTitleText": "课程表",
+          "navigationBarBackgroundColor": "#667eea",
+          "navigationBarTextStyle": "white"
+        }
+      },
+      {
+        "path": "pages/teacher/schedule",
+        "style": {
+          "navigationBarTitleText": "教师课程表",
+          "navigationBarBackgroundColor": "#FF9800",
+          "navigationBarTextStyle": "white"
+        }
+      },
+      {
+        "path": "pages/leave/apply",
+        "style": {
+          "navigationBarTitleText": "学生请假",
+          "navigationBarBackgroundColor": "#FF5722",
+          "navigationBarTextStyle": "white"
+        }
+      },
+      {
+        "path": "pages/schedule/manage",
+        "style": {
+          "navigationBarTitleText": "排课管理",
+          "navigationBarBackgroundColor": "#9C27B0",
+          "navigationBarTextStyle": "white"
+        }
+      },
+      {
+        "path": "pages/student/calendar",
+        "style": {
+          "navigationBarTitleText": "学生日历",
+          "navigationBarBackgroundColor": "#4CAF50",
+          "navigationBarTextStyle": "white"
+        }
+      }
+    ],
+    "globalStyle": {
+      "navigationBarTextStyle": "black",
+      "navigationBarTitleText": "保州教育平台",
+      "navigationBarBackgroundColor": "#F8F8F8",
+      "backgroundColor": "#F8F8F8"
+    }
+  }

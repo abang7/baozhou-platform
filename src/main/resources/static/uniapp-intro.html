@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniApp 课程表演示</title>
+    <!-- Vue3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .info {
+            background: #e8f4ff;
+            border-left: 4px solid #1890ff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .info-text {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 5px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #1890ff;
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .code-block {
+            background: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .code-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            color: #24292e;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .compare-box {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fafafa;
+        }
+
+        .compare-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .steps {
+            margin-top: 20px;
+        }
+
+        .step {
+            background: white;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: #52c41a;
+            color: white;
+            text-align: center;
+            line-height: 24px;
+            border-radius: 50%;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .step-content {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .link {
+            color: #1890ff;
+            text-decoration: none;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">🎓 从 Vue3 到 UniApp</div>
+
+        <div class="info">
+            <div class="info-text"><span class="tag">好消息</span>你已经学会了 Vue3，UniApp 就很简单了！</div>
+            <div class="info-text"><span class="tag">核心</span>UniApp = Vue3 + 多端编译</div>
+            <div class="info-text"><span class="tag">优势</span>一套代码，同时生成：网页、小程序、App</div>
+        </div>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-title"><span class="step-number">1</span>安装开发工具 HBuilderX</div>
+                <div class="step-content">
+                    <p>HBuilderX 是官方开发工具，专门用于开发 UniApp 项目。</p>
+                    <br>
+                    <p><strong>下载地址：</strong><a href="https://www.dcloud.io/hbuilderx.html" target="_blank" class="link">https://www.dcloud.io/hbuilderx.html</a></p>
+                    <br>
+                    <p><strong>选择版本：</strong>下载"标准版"即可（App开发版可以后期升级）</p>
+                    <br>
+                    <p><strong>安装说明：</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Windows：下载 .exe 安装包</li>
+                        <li>Mac：下载 .dmg 安装包</li>
+                        <li>直接双击安装，一路下一步即可</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title"><span class="step-number">2</span>创建 UniApp 项目</div>
+                <div class="step-content">
+                    <p><strong>两种方式：</strong></p>
+                    <br>
+                    <p><strong>方式A：使用 HBuilderX（推荐）</strong></p>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>打开 HBuilderX</li>
+                        <li>点击"文件" → "新建" → "项目"</li>
+                        <li>选择"UniApp"项目</li>
+                        <li>填写项目名称（如：baozhou-schedule）</li>
+                        <li>选择"Vue3"版本</li>
+                        <li>点击"创建"</li>
+                    </ol>
+                    <br>
+                    <p><strong>方式B：使用命令行（需要安装CLI）</strong></p>
+                    <div class="code-block">
+                        <code>npx degit dcloudio/uni-preset-vue#vite my-project</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title"><span class="step-number">3</span>了解项目结构</div>
+                <div class="step-content">
+                    <p>创建后的项目结构：</p>
+                    <div class="code-block">
+<code>uni-app-project/
+├── pages/              ← 页面文件
+│   └── index/
+│       └── index.vue  ← 首页
+├── static/             ← 静态资源
+├── App.vue             ← 应用配置
+├── main.js             ← 入口文件
+├── manifest.json       ← 应用配置
+└── pages.json          ← 页面配置</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title"><span class="step-number">4</span>代码对比：Vue3 vs UniApp</div>
+                <div class="comparison">
+                    <div class="compare-box">
+                        <div class="compare-title">📝 纯 Vue3（你学的）</div>
+                        <div class="code-block">
+<code>&lt;div&gt;{{ message }}&lt;/div&gt;
+
+&lt;script&gt;
+const { ref } = Vue;
+
+setup() {
+  const message = ref('你好');
+  return { message };
+}
+&lt;/script&gt;</code>
+                        </div>
+                    </div>
+                    <div class="compare-box">
+                        <div class="compare-title">📱 UniApp（几乎一样）</div>
+                        <div class="code-block">
+<code>&lt;view&gt;{{ message }}&lt;/view&gt;
+
+&lt;script&gt;
+export default {
+  data() {
+    return {
+      message: '你好'
+    }
+  }
+}
+&lt;/script&gt;</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title"><span class="step-number">5</span>主要区别</div>
+                <div class="step-content">
+                    <p><strong>标签变化：</strong></p>
+                    <div class="code-block">
+<code>&lt;div&gt;    → &lt;view&gt;
+&lt;span&gt;   → &lt;text&gt;
+&lt;img&gt;    → &lt;image&gt;
+&lt;a&gt;      → &lt;navigator&gt;</code>
+                    </div>
+                    <br>
+                    <p><strong>API变化：</strong></p>
+                    <div class="code-block">
+<code>// 网页：fetch
+fetch('/api/data')
+
+// UniApp：uni.request
+uni.request({
+  url: '/api/data'
+})</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title"><span class="step-number">6</span>运行到多端</div>
+                <div class="step-content">
+                    <p><strong>在 HBuilderX 中：</strong></p>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>运行到浏览器</strong>：点击"运行" → "运行到浏览器" → "Chrome"</li>
+                        <li><strong>运行到微信小程序</strong>：点击"运行" → "运行到小程序模拟器" → "微信开发者工具"</li>
+                        <li><strong>打包成App</strong>：点击"发行" → "原生App-云打包"</li>
+                    </ol>
+                    <br>
+                    <p><strong>注意：</strong>运行微信小程序需要先安装"微信开发者工具"</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="info" style="margin-top: 20px;">
+            <div class="info-text"><span class="tag">下一步</span>安装 HBuilderX 后，我教你创建第一个 UniApp 项目</div>
+            <div class="info-text"><span class="tag">提示</span>90% 的 Vue3 代码可以直接在 UniApp 中使用</div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue;
+
+        createApp({
+            setup() {
+                const step = ref(0);
+
+                return {
+                    step
+                };
+            }
+        }).mount('body');
+    </script>
+</body>
+</html>

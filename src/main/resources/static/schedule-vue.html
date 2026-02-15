@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课程表 - Vue3版本</title>
+    <!-- Vue3 核心库（CDN方式） -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+
+        .filter-bar {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .filter-bar label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .filter-bar select {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .filter-bar button {
+            padding: 8px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .filter-bar button:hover {
+            background: #5568d3;
+        }
+
+        .schedule-grid {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .schedule-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .schedule-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .schedule-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .schedule-type {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .type-one-on-one {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .type-one-on-three {
+            background: #2196F3;
+            color: white;
+        }
+
+        .schedule-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #666;
+            margin-right: 5px;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .student-list {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff9e6;
+            border-radius: 5px;
+            border-left: 3px solid #ffc107;
+        }
+
+        .student-list-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .student-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .student-tag {
+            padding: 5px 12px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #f44336;
+            font-size: 16px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .weekday-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            background: #667eea;
+            color: white;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .subject-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            background: #FF9800;
+            color: white;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Vue3 应用挂载点 -->
+    <div id="app">
+        <div class="container">
+            <h1>📚 保州教育平台 - 课程表（Vue3版本）</h1>
+
+            <!-- 统计信息 -->
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value">{{ totalClasses }}</div>
+                    <div class="stat-label">总班级数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ totalStudents }}</div>
+                    <div class="stat-label">在读学生</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ totalTeachers }}</div>
+                    <div class="stat-label">授课教师</div>
+                </div>
+            </div>
+
+            <!-- 筛选栏 -->
+            <div class="filter-bar">
+                <label>星期：</label>
+                <!-- v-model：双向绑定，数据变→下拉框变，下拉框变→数据变 -->
+                <select v-model="filters.weekday">
+                    <option value="">全部</option>
+                    <option value="周一">周一</option>
+                    <option value="周二">周二</option>
+                    <option value="周三">周三</option>
+                    <option value="周四">周四</option>
+                    <option value="周五">周五</option>
+                    <option value="周六">周六</option>
+                    <option value="周日">周日</option>
+                </select>
+
+                <label>学科：</label>
+                <select v-model="filters.subject">
+                    <option value="">全部</option>
+                    <option value="数学">数学</option>
+                    <option value="英语">英语</option>
+                    <option value="语文">语文</option>
+                    <option value="物理">物理</option>
+                    <option value="化学">化学</option>
+                    <option value="政治">政治</option>
+                    <option value="历史">历史</option>
+                    <option value="地理">地理</option>
+                </select>
+
+                <label>班级类型：</label>
+                <select v-model="filters.classType">
+                    <option value="">全部</option>
+                    <option value="一对一">一对一</option>
+                    <option value="一对三">一对三</option>
+                </select>
+
+                <button @click="loadSchedule">🔍 查询</button>
+                <button @click="resetFilters">🔄 重置</button>
+            </div>
+
+            <!-- 课程表容器 -->
+            <div class="schedule-grid">
+                <!-- v-if：条件渲染 -->
+                <div v-if="loading" class="loading">⏳ 正在加载课程表...</div>
+
+                <div v-else-if="error" class="error">❌ {{ error }}</div>
+
+                <div v-else-if="filteredSchedule.length === 0" class="empty">📭 暂无课程数据</div>
+
+                <!-- v-for：列表渲染 -->
+                <div
+                    v-for="item in filteredSchedule"
+                    :key="item.classId"
+                    class="schedule-card"
+                >
+                    <!-- 模板中使用插值表达式 {{ }} -->
+                    <div class="schedule-header">
+                        <div class="schedule-title">
+                            <span class="weekday-tag">{{ item.weekday }}</span>
+                            <span class="subject-tag">{{ item.subject }}</span>
+                            {{ item.timeSlot }}
+                        </div>
+                        <!-- 动态class绑定 -->
+                        <span
+                            class="schedule-type"
+                            :class="item.classType === '一对一' ? 'type-one-on-one' : 'type-one-on-three'"
+                        >
+                            {{ item.classType }}
+                        </span>
+                    </div>
+
+                    <div class="schedule-info">
+                        <div class="info-item">
+                            <span class="info-label">👨‍🏫 教师：</span>
+                            <span class="info-value">{{ item.teacherName || '未分配' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">🏫 教室：</span>
+                            <span class="info-value">{{ item.classroom || '-' }} ({{ item.floor || '-' }})</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">👥 学生：</span>
+                            <span class="info-value">{{ item.currentStudents || 0 }} / {{ item.maxStudents || 0 }}人</span>
+                        </div>
+                    </div>
+
+                    <!-- 条件渲染：有学生才显示 -->
+                    <div v-if="item.students && item.students.length > 0" class="student-list">
+                        <div class="student-list-title">📋 学生名单：</div>
+                        <div class="student-tags">
+                            <span
+                                v-for="student in item.students"
+                                :key="student.studentId"
+                                class="student-tag"
+                            >
+                                {{ student.studentName }} ({{ student.grade }}年级)
+                            </span>
+                        </div>
+                    </div>
+                    <div v-else class="student-list">
+                        <div class="student-list-title">📋 暂无学生</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                // ========== 响应式数据 ==========
+
+                // 原始数据
+                const allScheduleData = ref([]);
+
+                // 加载状态
+                const loading = ref(true);
+                const error = ref('');
+
+                // 筛选条件
+                const filters = ref({
+                    weekday: '',
+                    subject: '',
+                    classType: ''
+                });
+
+                // ========== 计算属性（自动计算的数据） ==========
+
+                // 根据筛选条件过滤数据
+                const filteredSchedule = computed(() => {
+                    let result = allScheduleData.value;
+
+                    if (filters.value.weekday) {
+                        result = result.filter(item => item.weekday === filters.value.weekday);
+                    }
+
+                    if (filters.value.subject) {
+                        result = result.filter(item => item.subject === filters.value.subject);
+                    }
+
+                    if (filters.value.classType) {
+                        result = result.filter(item => item.classType === filters.value.classType);
+                    }
+
+                    return result;
+                });
+
+                // 统计数据（自动计算）
+                const totalClasses = computed(() => filteredSchedule.value.length);
+
+                const totalStudents = computed(() => {
+                    return filteredSchedule.value.reduce((sum, item) => sum + (item.currentStudents || 0), 0);
+                });
+
+                const totalTeachers = computed(() => {
+                    const uniqueTeachers = new Set(filteredSchedule.value.map(item => item.teacherId));
+                    return uniqueTeachers.size;
+                });
+
+                // ========== 方法（函数） ==========
+
+                // 加载数据
+                async function loadSchedule() {
+                    loading.value = true;
+                    error.value = '';
+
+                    try {
+                        const response = await fetch('/api/class/schedule');
+                        if (!response.ok) {
+                            throw new Error('网络响应失败');
+                        }
+                        const data = await response.json();
+                        allScheduleData.value = data;
+                    } catch (e) {
+                        console.error('加载失败:', e);
+                        error.value = '加载课程表失败，请确保后端服务已启动';
+                    } finally {
+                        loading.value = false;
+                    }
+                }
+
+                // 重置筛选
+                function resetFilters() {
+                    filters.value = {
+                        weekday: '',
+                        subject: '',
+                        classType: ''
+                    };
+                }
+
+                // ========== 生命周期钩子 ==========
+
+                // 组件挂载后自动执行
+                onMounted(() => {
+                    loadSchedule();
+                });
+
+                // ========== 返回给模板使用 ==========
+                return {
+                    // 数据
+                    loading,
+                    error,
+                    filters,
+
+                    // 计算属性
+                    filteredSchedule,
+                    totalClasses,
+                    totalStudents,
+                    totalTeachers,
+
+                    // 方法
+                    loadSchedule,
+                    resetFilters
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

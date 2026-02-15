@@ -1,0 +1,374 @@
+<template>
+  <view class="container">
+    <!-- 页面标题 -->
+    <view class="title">📝 录入学生信息</view>
+
+    <!-- 表单区域 -->
+    <view class="form">
+      <!-- 学生姓名 -->
+      <view class="form-item">
+        <text class="label">学生姓名 <text class="required">*</text></text>
+        <input
+          class="input"
+          v-model="formData.studentName"
+          placeholder="请输入学生姓名"
+        />
+      </view>
+
+      <!-- 性别 -->
+      <view class="form-item">
+        <text class="label">性别</text>
+        <radio-group @change="onGenderChange">
+          <label class="radio">
+            <radio value="男" :checked="formData.sex === '男'" />
+            <text>男</text>
+          </label>
+          <label class="radio">
+            <radio value="女" :checked="formData.sex === '女'" />
+            <text>女</text>
+          </label>
+        </radio-group>
+      </view>
+
+      <!-- 年级 -->
+      <view class="form-item">
+        <text class="label">年级 <text class="required">*</text></text>
+        <input
+          class="input"
+          v-model="formData.grade"
+          type="number"
+          placeholder="请输入年级（如：10）"
+        />
+      </view>
+
+      <!-- 学段 -->
+      <view class="form-item">
+        <text class="label">学段</text>
+        <picker
+          mode="selector"
+          :range="levelOptions"
+          @change="onLevelChange"
+        >
+          <view class="picker">
+            {{ formData.level || '请选择学段' }}
+            <text class="arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 家长姓名 -->
+      <view class="form-item">
+        <text class="label">家长姓名</text>
+        <input
+          class="input"
+          v-model="formData.parentName"
+          placeholder="请输入家长姓名"
+        />
+      </view>
+
+      <!-- 家长手机号 -->
+      <view class="form-item">
+        <text class="label">家长手机号</text>
+        <input
+          class="input"
+          v-model="formData.parentPhone"
+          type="number"
+          maxlength="11"
+          placeholder="请输入手机号"
+        />
+      </view>
+
+      <!-- 状态 -->
+      <view class="form-item">
+        <text class="label">状态</text>
+        <picker
+          mode="selector"
+          :range="statusOptions"
+          @change="onStatusChange"
+        >
+          <view class="picker">
+            {{ formData.status || '请选择状态' }}
+            <text class="arrow">›</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+
+    <!-- 提交按钮 -->
+    <view class="btn-group">
+      <button class="btn btn-primary" @click="submit">提交</button>
+      <button class="btn btn-secondary" @click="reset">重置</button>
+    </view>
+
+    <!-- 提示信息 -->
+    <view class="tips">
+      <text class="tips-text">提示：带 * 的为必填项</text>
+    </view>
+  </view>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      // 表单数据
+      formData: {
+        studentName: '',      // 学生姓名
+        sex: '',             // 性别
+        grade: '',           // 年级
+        level: '',           // 学段
+        parentName: '',      // 家长姓名
+        parentPhone: '',     // 家长手机号
+        status: '在读'       // 状态
+      },
+
+      // 学段选项
+      levelOptions: ['小学', '初中', '高中'],
+
+      // 状态选项
+      statusOptions: ['在读', '停课', '毕业', '退费']
+    }
+  },
+
+  methods: {
+    // 性别选择变化
+    onGenderChange(e) {
+      this.formData.sex = e.detail.value;
+    },
+
+    // 学段选择变化
+    onLevelChange(e) {
+      this.formData.level = this.levelOptions[e.detail.value];
+    },
+
+    // 状态选择变化
+    onStatusChange(e) {
+      this.formData.status = this.statusOptions[e.detail.value];
+    },
+
+    // 提交表单
+    async submit() {
+      // 1. 表单验证
+      if (!this.validate()) {
+        return;
+      }
+
+      // 2. 显示加载提示
+      uni.showLoading({
+        title: '提交中...'
+      });
+
+      try {
+        // 3. 调用后端API
+        const res = await this.saveStudent();
+
+        // 4. 提交成功
+        uni.hideLoading();
+        uni.showToast({
+          title: '录入成功',
+          icon: 'success'
+        });
+
+        // 5. 重置表单
+        this.reset();
+
+      } catch (error) {
+        uni.hideLoading();
+        uni.showToast({
+          title: '录入失败',
+          icon: 'none'
+        });
+        console.error('保存失败:', error);
+      }
+    },
+
+    // 保存学生（调用API）
+    async saveStudent() {
+      // 开发环境：本地测试
+      // 生产环境：连接后端API
+      const apiUrl = 'http://localhost:8080/api/student';
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(this.formData)
+      });
+
+      if (!response.ok) {
+        throw new Error('网络请求失败');
+      }
+
+      const data = await response.json();
+      if (!data) {
+        throw new Error('保存失败');
+      }
+
+      return data;
+    },
+
+    // 表单验证
+    validate() {
+      // 验证姓名
+      if (!this.formData.studentName) {
+        uni.showToast({
+          title: '请输入学生姓名',
+          icon: 'none'
+        });
+        return false;
+      }
+
+      // 验证年级
+      if (!this.formData.grade) {
+        uni.showToast({
+          title: '请输入年级',
+          icon: 'none'
+        });
+        return false;
+      }
+
+      // 验证手机号格式
+      if (this.formData.parentPhone) {
+        const phoneReg = /^1[3-9]\d{9}$/;
+        if (!phoneReg.test(this.formData.parentPhone)) {
+          uni.showToast({
+            title: '手机号格式不正确',
+            icon: 'none'
+          });
+          return false;
+        }
+      }
+
+      return true;
+    },
+
+    // 重置表单
+    reset() {
+      this.formData = {
+        studentName: '',
+        sex: '',
+        grade: '',
+        level: '',
+        parentName: '',
+        parentPhone: '',
+        status: '在读'
+      };
+    }
+  }
+}
+</script>
+
+<style scoped>
+.container {
+  padding: 20px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.form {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.form-item {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 15px;
+}
+
+.form-item:last-child {
+  border-bottom: none;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.required {
+  color: #ff4d4f;
+}
+
+.input {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+.radio {
+  display: inline-block;
+  margin-right: 20px;
+}
+
+.radio text {
+  margin-left: 5px;
+}
+
+.picker {
+  height: 40px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #333;
+}
+
+.arrow {
+  color: #999;
+  font-size: 20px;
+}
+
+.btn-group {
+  margin-top: 30px;
+  display: flex;
+  gap: 15px;
+}
+
+.btn {
+  flex: 1;
+  height: 44px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.btn-primary {
+  background: #007AFF;
+  color: white;
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.tips {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.tips-text {
+  font-size: 12px;
+  color: #999;
+}
+</style>

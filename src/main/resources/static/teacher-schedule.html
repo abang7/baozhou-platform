@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师课程表</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-group label {
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+        }
+
+        select {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            min-width: 150px;
+            cursor: pointer;
+        }
+
+        .schedule-wrapper {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 0 auto;
+        }
+
+        th, td {
+            border: 1px solid #e0e0e0;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+            font-size: 15px;
+            text-align: center;
+            min-width: 140px;
+            padding: 18px;
+        }
+
+        th.time-slot {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            min-width: 200px;
+            padding: 18px;
+        }
+
+        td.date-cell {
+            background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+            font-weight: bold;
+            color: #FF6F00;
+            font-size: 15px;
+            text-align: center;
+            min-width: 200px;
+            padding: 15px;
+        }
+
+        td.course-cell {
+            padding: 18px;
+            min-width: 140px;
+            background: white;
+        }
+
+        .student-list {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 8px;
+            justify-content: flex-start;
+        }
+
+        .student-name {
+            display: inline-block;
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.25);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .student-name:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+        }
+
+        .student-name.on-leave {
+            background: linear-gradient(135deg, #FF5722 0%, #F44336 100%);
+            box-shadow: 0 3px 10px rgba(244, 67, 54, 0.3);
+            opacity: 0.7;
+        }
+
+        .student-name.on-leave:hover {
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        .empty-cell {
+            color: #ddd;
+            font-size: 16px;
+            text-align: center;
+            padding: 25px;
+            font-style: italic;
+        }
+
+        .loading, .error, .empty {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+        }
+
+        .legend {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 13px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-sample {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+
+        .legend-sample.on-leave {
+            background: linear-gradient(135deg, #FF5722 0%, #F44336 100%);
+            color: white;
+            border-color: #FFCDD2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👨‍🏫 教师课程表</h1>
+            <div class="filters">
+                <div class="filter-group">
+                    <label>选择教师：</label>
+                    <select id="teacherSelect">
+                        <option value="">请选择教师</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>选择学期：</label>
+                    <select id="semesterSelect">
+                        <option value="">请选择学期</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading" class="loading">
+            <div>⏳ 正在加载...</div>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="empty" class="empty" style="display: none;">
+            <div style="font-size: 48px; margin-bottom: 15px;">📭</div>
+            <div style="font-size: 18px; color: #666;">暂无排课数据</div>
+            <div style="font-size: 14px; color: #999; margin-top: 10px;">请先选择教师和学期</div>
+        </div>
+
+        <div id="scheduleWrapper" class="schedule-wrapper" style="display: none;">
+            <table id="scheduleTable">
+                <thead>
+                    <tr id="headerRow">
+                        <th class="time-slot">时间段</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleBody">
+                </tbody>
+            </table>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-sample">学生</div>
+                    <span>正常上课</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-sample on-leave">学生</div>
+                    <span>已请假</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+
+        // 时间段定义
+        const TIME_SLOTS = [
+            { id: 1, name: '第1节', time: '07:40-09:40' },
+            { id: 2, name: '第2节', time: '09:40-11:40' },
+            { id: 3, name: '第3节', time: '12:30-14:30' },
+            { id: 4, name: '第4节', time: '14:30-16:30' },
+            { id: 5, name: '第5节', time: '16:30-18:30' },
+            { id: 6, name: '第6节', time: '18:50-20:50' }
+        ];
+
+        let teachers = [];
+        let semesters = [];
+        let scheduleData = [];
+
+        // 初始化
+        async function init() {
+            try {
+                await Promise.all([loadTeachers(), loadSemesters()]);
+                document.getElementById('loading').style.display = 'none';
+            } catch (error) {
+                showError('加载数据失败，请确保后端服务已启动');
+                console.error(error);
+            }
+        }
+
+        // 加载教师列表
+        async function loadTeachers() {
+            const response = await fetch(`${API_BASE}/teacher`);
+            teachers = await response.json();
+
+            const select = document.getElementById('teacherSelect');
+            teachers.forEach(teacher => {
+                const option = document.createElement('option');
+                option.value = teacher.teacherId;
+                option.textContent = teacher.teacherName;
+                select.appendChild(option);
+            });
+        }
+
+        // 加载学期列表
+        async function loadSemesters() {
+            try {
+                const response = await fetch(`${API_BASE}/semester`);
+                semesters = await response.json();
+
+                console.log('加载到的学期列表:', semesters);
+
+                const select = document.getElementById('semesterSelect');
+                select.innerHTML = '<option value="">请选择学期</option>';
+                semesters.forEach(semester => {
+                    const option = document.createElement('option');
+                    option.value = semester.semesterId;
+                    option.textContent = semester.semesterName;
+                    select.appendChild(option);
+                });
+
+                // 自动选择当前进行中的学期
+                const current = semesters.find(s => s.status === '进行中');
+                if (current) {
+                    select.value = current.semesterId;
+                    console.log('自动选择学期:', current.semesterName);
+                }
+            } catch (error) {
+                console.error('加载学期失败:', error);
+            }
+        }
+
+        // 加载课程表
+        async function loadSchedule() {
+            const teacherId = document.getElementById('teacherSelect').value;
+            const semesterId = document.getElementById('semesterSelect').value;
+
+            console.log('开始加载课程表 - 教师ID:', teacherId, '学期ID:', semesterId);
+
+            if (!teacherId || !semesterId) {
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const url = `${API_BASE}/class-schedule/teacher-data/${teacherId}?semesterId=${semesterId}`;
+                console.log('请求URL:', url);
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('加载失败');
+
+                const allSchedules = await response.json();
+                console.log('获取到的所有课程数据数量:', allSchedules.length);
+
+                if (allSchedules.length === 0) {
+                    hideLoading();
+                    document.getElementById('empty').style.display = 'block';
+                    document.getElementById('scheduleWrapper').style.display = 'none';
+                    return;
+                }
+
+                scheduleData = allSchedules;
+
+                // 获取所有唯一的日期并排序
+                const allDates = [...new Set(scheduleData.map(s => s.courseDate))].sort();
+                const dates = allDates; // 显示所有课程日期
+
+                console.log('所有课程日期范围:', allDates);
+                console.log('显示的日期数量:', dates.length);
+
+                hideLoading();
+                renderScheduleTable(dates);
+
+            } catch (error) {
+                hideLoading();
+                showError('加载课程表失败：' + error.message);
+                console.error('详细错误:', error);
+            }
+        }
+
+        // 渲染课程表
+        function renderScheduleTable(dates) {
+            document.getElementById('scheduleWrapper').style.display = 'block';
+
+            // 设置表头
+            const headerRow = document.getElementById('headerRow');
+            headerRow.innerHTML = '<th class="time-slot">时间段</th>';
+            dates.forEach(date => {
+                const dateObj = new Date(date);
+                const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+                const weekday = weekdays[dateObj.getDay()];
+                const dateShort = formatDateShort(dateObj);
+
+                const th = document.createElement('th');
+                th.innerHTML = `${dateShort}<br><span style="font-size:12px;opacity:0.8">${weekday}</span>`;
+                headerRow.appendChild(th);
+            });
+
+            // 生成表格内容
+            const tbody = document.getElementById('scheduleBody');
+            tbody.innerHTML = '';
+
+            TIME_SLOTS.forEach(slot => {
+                const tr = document.createElement('tr');
+
+                // 时间段列
+                const timeTd = document.createElement('td');
+                timeTd.className = 'date-cell';
+                timeTd.innerHTML = `${slot.name}<br><span style="font-size:12px;color:#666">${slot.time}</span>`;
+                tr.appendChild(timeTd);
+
+                // 每个日期的列
+                dates.forEach(date => {
+                    const td = document.createElement('td');
+                    td.className = 'course-cell';
+
+                    // 查找该日期该时间段的课程
+                    const courses = scheduleData.filter(s => {
+                        return s.courseDate === date && s.startTime.startsWith(slot.time.split('-')[0]);
+                    });
+
+                    if (courses.length === 0) {
+                        td.innerHTML = '<div class="empty-cell">-</div>';
+                    } else {
+                        // 收集所有学生
+                        const allStudents = [];
+                        courses.forEach(course => {
+                            if (course.students && course.students.length > 0) {
+                                course.students.forEach(student => {
+                                    allStudents.push({
+                                        studentId: student.studentId,
+                                        name: student.studentName,
+                                        isOnLeave: student.isOnLeave || false,
+                                        courseDate: course.courseDate,
+                                        semesterId: course.semesterId
+                                    });
+                                });
+                            }
+                        });
+
+                        // 渲染学生名字
+                        const studentListDiv = document.createElement('div');
+                        studentListDiv.className = 'student-list';
+
+                        allStudents.forEach(s => {
+                            const span = document.createElement('span');
+                            span.className = `student-name ${s.isOnLeave ? 'on-leave' : ''}`;
+                            span.textContent = s.name;
+                            span.onclick = () => toggleLeave(s);
+                            studentListDiv.appendChild(span);
+                        });
+
+                        td.appendChild(studentListDiv);
+                    }
+
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 格式化日期 MM-DD
+        function formatDateShort(date) {
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${month}-${day}`;
+        }
+
+        // 显示加载中
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('empty').style.display = 'none';
+            document.getElementById('scheduleWrapper').style.display = 'none';
+        }
+
+        // 隐藏加载中
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // 切换请假状态
+        async function toggleLeave(studentInfo) {
+            const { studentId, name, isOnLeave, courseDate, semesterId } = studentInfo;
+
+            if (isOnLeave) {
+                // 已请假，确认是否取消请假
+                if (!confirm(`确定要取消 ${name} 在 ${courseDate} 的请假吗？`)) {
+                    return;
+                }
+
+                try {
+                    // 查询该学生在该日期的请假记录
+                    const response = await fetch(`${API_BASE}/student-leave/student/${studentId}`);
+                    const leaves = await response.json();
+
+                    // 找到对应日期的请假记录
+                    const targetLeave = leaves.find(leave => {
+                        const startDate = leave.startDate;
+                        const endDate = leave.endDate;
+                        return courseDate >= startDate && courseDate <= endDate;
+                    });
+
+                    if (targetLeave) {
+                        // 删除请假记录
+                        const deleteResponse = await fetch(`${API_BASE}/student-leave/${targetLeave.leaveId}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (deleteResponse.ok) {
+                            alert('已取消请假');
+                            // 重新加载课程表
+                            loadSchedule();
+                        } else {
+                            alert('取消请假失败');
+                        }
+                    } else {
+                        alert('未找到请假记录');
+                    }
+                } catch (error) {
+                    console.error('取消请假失败:', error);
+                    alert('取消请假失败：' + error.message);
+                }
+            } else {
+                // 未请假，弹出输入框让用户输入请假原因
+                const reason = prompt(`请输入 ${name} 在 ${courseDate} 的请假原因：`);
+                if (reason === null || reason.trim() === '') {
+                    return;
+                }
+
+                try {
+                    // 创建请假记录
+                    const response = await fetch(`${API_BASE}/student-leave`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            studentId: studentId,
+                            semesterId: semesterId,
+                            startDate: courseDate,
+                            endDate: courseDate,
+                            leaveType: '其他',
+                            reason: reason.trim()
+                        })
+                    });
+
+                    if (response.ok) {
+                        alert('已设置请假');
+                        // 重新加载课程表
+                        loadSchedule();
+                    } else {
+                        alert('设置请假失败');
+                    }
+                } catch (error) {
+                    console.error('设置请假失败:', error);
+                    alert('设置请假失败：' + error.message);
+                }
+            }
+        }
+
+        // 显示错误
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.style.display = 'block';
+        }
+
+        // 事件监听
+        document.getElementById('teacherSelect').addEventListener('change', loadSchedule);
+        document.getElementById('semesterSelect').addEventListener('change', loadSchedule);
+
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

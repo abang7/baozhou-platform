@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Vue3 第一课</title>
+    <!-- 这一行：从网络加载Vue3库 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <!-- 这是Vue的容器，id="app"是Vue的入口 -->
+    <div id="app">
+        <h1>你好，Vue3!</h1>
+        <!-- @click：点击事件，当按钮被点击时执行increment函数 -->
+        <button @click="increment">点击我 +1</button>
+        <!-- 双花括号：显示响应式数据 -->
+        <div>数字：{{ count }}</div>
+    </div>
+
+    <!-- 下面开始写JavaScript代码 -->
+    <script>
+        // 第1行：从Vue对象中解构出createApp和ref
+        const { createApp, ref } = Vue;
+
+        // 第2行：创建Vue应用
+        createApp({
+            setup() {
+                // 第1步：创建响应式数据
+                const count = ref(0);
+
+                // 第2步：定义函数（让count加1）
+                function increment() {
+                    count.value++;  // 注意：ref数据要用.value访问
+                }
+
+                // 第3步：把数据和函数都返回给模板使用
+                return {
+                    count,
+                    increment
+                };
+            }
+        })
+        // 第3行：把Vue应用挂载到id="app"的div上
+        .mount('#app');
+    </script>
+</body>
+</html>
